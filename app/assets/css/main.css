@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Play';
+  src: url('../fonts/Play-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+    font-family: 'Play';
+    src: url('../fonts/Play-Bold.ttf');
+    font-weight: bold;
+}
+
+body {
+  font-family: 'Play', sans-serif;
+  font-size: 55px;
+  color: white;
+}
+
+:root{
+    --p-primary-color: #03afafad;
+    --p-primary-contrast-color: white;
+    --p-primary-hover-color: #03afaf;
+    --p-primary-active-color: #028888;
+}
