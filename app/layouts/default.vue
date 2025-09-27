@@ -1,6 +1,9 @@
 <template>
   <div>
-    <slot />
+    <div class="h-screen flex flex-col">
+      <slot/>
+    </div>
+    <Footer />
   </div>
 </template>
 

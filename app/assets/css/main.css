@@ -6,15 +6,18 @@
   font-weight: normal;
   font-style: normal;
 }
-
 @font-face {
     font-family: 'Play';
     src: url('../fonts/Play-Bold.ttf');
     font-weight: bold;
 }
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('../fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf');
+}
 
 body {
-  font-family: 'Play', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 55px;
   color: white;
 }

@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   ssr: false,
+  hooks: {
+    'prerender:routes' ({routes}) {
+      routes.clear();
+    }
+  },
 
   css: ["~/assets/css/main.css"],
 

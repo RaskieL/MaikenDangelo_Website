@@ -1,18 +1,21 @@
-import * as THREE from 'three';
-import { SceneManager } from '../SceneManager';
+import * as THREE from "three";
+import { SceneManager } from "../SceneManager";
 
-import { RScene } from './Scene';
+import { RScene } from "./Scene";
 
 export class MainMenu_Scene extends RScene {
   private planet: THREE.Mesh | null = null;
   private clouds: THREE.Mesh | null = null;
   private atmosphere: THREE.Mesh | null = null;
-  private cockpit: THREE.Group | null = null;
-  private navsphere: THREE.Mesh | null = null;
   private planetMaterial: THREE.MeshStandardMaterial | null = null;
   private cloudMaterial: THREE.MeshStandardMaterial | null = null;
   private initialized = false;
   private introAnimationDone = false;
+  private isRotatingToCoordinate = false;
+  private targetRotationQuaternion: THREE.Quaternion | null = null;
+  private isHoveringMenuElement = false;
+  private isResettingCameraPosition = false;
+  private targetCameraQuaternion: THREE.Quaternion | null = null;
 
   constructor(container: HTMLElement, sceneManager: SceneManager) {
     super(container, sceneManager);
@@ -21,9 +24,13 @@ export class MainMenu_Scene extends RScene {
 
   private async InitPlanet() {
     // Constructing Planet
-    const baseColor = await this.loadTexture('/textures/BaseColor_NoCloud_Texture.png');
-    const normalMap = await this.loadTexture('/textures/Normal_Texture.png');
-    const roughnessMap = await this.loadTexture('/textures/Roughness_NoCloud_Texture.png');
+    const baseColor = await this.loadTexture(
+      "/textures/BaseColor_NoCloud_Texture.png"
+    );
+    const normalMap = await this.loadTexture("/textures/Normal_Texture.png");
+    const roughnessMap = await this.loadTexture(
+      "/textures/Roughness_NoCloud_Texture.png"
+    );
     baseColor.colorSpace = THREE.SRGBColorSpace;
 
     const planetMaterial = new THREE.MeshStandardMaterial({
@@ -39,11 +46,11 @@ export class MainMenu_Scene extends RScene {
     const geometry = new THREE.SphereGeometry(1, 128, 128);
     geometry.computeVertexNormals();
     const planet = new THREE.Mesh(geometry, planetMaterial);
-    planet.name = 'Planet';
+    planet.name = "Planet";
     this.planet = planet;
     this.planetMaterial = planetMaterial;
 
-    const clouds = await this.loadTexture('/textures/earth_clouds_8K.png');
+    const clouds = await this.loadTexture("/textures/earth_clouds_8K.png");
     const cloudMaterial = new THREE.MeshStandardMaterial({
       map: clouds,
       alphaMap: clouds,
@@ -55,10 +62,9 @@ export class MainMenu_Scene extends RScene {
     const cloudGeometry = new THREE.SphereGeometry(1.01, 128, 128);
     cloudGeometry.computeVertexNormals();
     const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
-    cloudMesh.name = 'Clouds';
+    cloudMesh.name = "Clouds";
     this.clouds = cloudMesh;
     this.cloudMaterial = cloudMaterial;
-
 
     const uniforms = {
       uColor: { value: new THREE.Color(0x3399ff) },
@@ -88,7 +94,7 @@ export class MainMenu_Scene extends RScene {
       side: THREE.DoubleSide,
     });
     const volumetricSphere = new THREE.Mesh(cloudGeometry, volMat);
-    volumetricSphere.name = 'VolumetricSphere';
+    volumetricSphere.name = "VolumetricSphere";
     this.atmosphere = volumetricSphere;
 
     this.addToScene(planet);
@@ -103,61 +109,28 @@ export class MainMenu_Scene extends RScene {
     volumetricSphere.position.set(3.25, -1.75, 1);
   }
 
-  private async InitCockpit() {
-    const cockpit = await this.loadGLTF('/models/cockpit/cockpit.gltf');
-    let navsphere: THREE.Mesh | null = null;
-    if (cockpit) {
-      cockpit.rotation.set(0, 1.57075, 0);
-      cockpit.scale.set(0.25, 0.25, 0.25);
-      cockpit.position.set(
-        this.getCamera().position.x,
-        this.getCamera().position.y - 0.15,
-        this.getCamera().position.z - 0.25
-      );
-      navsphere = cockpit.getObjectByName("Navsphere") as THREE.Mesh;
-      this.cockpit = cockpit;
-      this.navsphere = navsphere;
-    }
-
-    //const navsphereTexture = await this.loadTexture('/textures/Navsphere_Texture.png');
-    const emissionTexture = await this.loadTexture('/textures/Navsphere_Emission_Texture.png');
-
-    // emission
-    if (navsphere && navsphere.material) {
-      const material = navsphere.material as THREE.MeshStandardMaterial;
-      material.emissive = new THREE.Color(0xffffff);
-      material.emissiveIntensity = 5.0;
-      material.emissiveMap = emissionTexture;
-      material.needsUpdate = true;
-    }
-  }
-
-
   async Init() {
     if (this.initialized) return;
 
     this.getCamera().fov = 180;
     this.getCamera().updateProjectionMatrix();
 
-    const lightColor = '#FDE9A4';
-    const lightIntensity = 5;
-    const light = new THREE.DirectionalLight(lightColor, lightIntensity);
-    light.position.set(-10, 5, -2);
-    light.target.position.set(0, 0, 0);
+    const lightColor = "#FDE9A4";
+    const lightIntensity = 150;
+    const light = new THREE.PointLight(lightColor, lightIntensity);
+    light.position.set(-8, 2, -3);
 
     this.addToScene(light);
-    this.addToScene(light.target);
 
     // this.addSkyboxFromEquirectangular('/textures/HDR_galactic_plane_no_nebulae.hdr');
 
-    const skybox = await this.loadGLTF('/models/inside_galaxy/scene.gltf');
+    const skybox = await this.loadGLTF("/models/inside_galaxy/scene.gltf");
     if (skybox) {
       skybox.scale.set(10, 10, 10);
       this.addToScene(skybox);
     }
 
     await this.InitPlanet();
-    await this.InitCockpit();
 
     this.initialized = true;
   }
@@ -185,19 +158,18 @@ export class MainMenu_Scene extends RScene {
   animate() {
     if (!this.initialized) return;
 
-
-
-    if (this.planet && this.planetMaterial) {
-      this.planet.rotateOnAxis(new THREE.Vector3(0.34, 0.76, 0), 0.00005);
-      this.planetMaterial.needsUpdate = true;
+    if (!this.isHoveringMenuElement) {
+      if (this.planet && this.planetMaterial) {
+        this.planet.rotateOnAxis(new THREE.Vector3(0.34, 0.76, 0), 0.00005);
+        this.planetMaterial.needsUpdate = true;
+      }
     }
+
     if (this.clouds && this.cloudMaterial) {
       this.clouds.rotateOnAxis(new THREE.Vector3(0.34, 0.76, 0), 0.000035);
       this.cloudMaterial.needsUpdate = true;
     }
-    if (this.cockpit && this.navsphere) {
-      this.navsphere.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.01);
-    }
+
     if (!this.introAnimationDone) {
       // Intro animation
       if (this.planet && this.clouds && this.atmosphere) {
@@ -234,5 +206,120 @@ export class MainMenu_Scene extends RScene {
         }
       }
     }
+
+    if (
+      this.isRotatingToCoordinate &&
+      this.targetRotationQuaternion &&
+      this.planet &&
+      this.clouds
+    ) {
+      this.rotatePlanetToQt(this.targetRotationQuaternion);
+      this.pointCameraToQt(this.targetRotationQuaternion);
+    }
+
+    if (this.isResettingCameraPosition && this.targetCameraQuaternion) {
+      this.pointCameraToQt(this.targetCameraQuaternion);
+    }
+  }
+
+  public rotatePlanetTo(position: THREE.Vector3) {
+    if (!this.planet) return;
+    if (!this.clouds) return;
+    if (!this.introAnimationDone) return;
+    const direction = new THREE.Vector3()
+      .subVectors(position, this.planet.position)
+      .normalize();
+
+    const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      direction
+    );
+
+    this.isRotatingToCoordinate = true;
+    this.isResettingCameraPosition = false;
+    this.targetRotationQuaternion = targetQuaternion;
+  }
+
+  public rotatePlanetToQt(
+    targetQuaternion: THREE.Quaternion,
+    speed: number = 0.05
+  ) {
+    if (!this.planet) return;
+    if (!this.clouds) return;
+    if (!this.introAnimationDone) return;
+
+    this.planet.quaternion.slerp(targetQuaternion, speed);
+    this.clouds.quaternion.slerp(targetQuaternion, speed);
+
+    const angleDifference = this.planet.quaternion.angleTo(targetQuaternion);
+
+    if (angleDifference < 0.001) {
+      this.planet.quaternion.copy(targetQuaternion);
+      this.clouds.quaternion.copy(targetQuaternion);
+      this.isRotatingToCoordinate = false;
+      this.targetRotationQuaternion = null;
+    }
+  }
+
+  public pointCameraTo(position: THREE.Vector3) {
+    if (!this.introAnimationDone) return;
+    const direction = new THREE.Vector3()
+      .subVectors(position, this.getCamera().position)
+      .normalize();
+      
+    const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 0),
+      direction
+    );
+    this.targetCameraQuaternion = targetQuaternion;
+  }
+
+  public pointCameraToQt(
+    targetQuaternion: THREE.Quaternion,
+    speed: number = 0.05
+  ) {
+    if (!this.introAnimationDone) return;
+
+    this.getCamera().quaternion.slerp(targetQuaternion, speed);
+
+    const angleDifference =
+      this.getCamera().quaternion.angleTo(targetQuaternion);
+
+    if (angleDifference < 0.001) {
+      this.getCamera().quaternion.copy(targetQuaternion);
+      this.isResettingCameraPosition = false;
+    }
+  }
+
+  public resetCameraPosition() {
+    if (!this.introAnimationDone) return;
+    this.isResettingCameraPosition = true;
+    this.getCamera().position.set(0, 0, 5);
+    this.pointCameraTo(new THREE.Vector3(0, 0, 0));
+    this.getCamera().fov = 75;
+    this.getCamera().updateProjectionMatrix();
+  }
+
+  public getPlanet(): THREE.Mesh | null {
+    return this.planet;
+  }
+
+  public getClouds(): THREE.Mesh | null {
+    return this.clouds;
+  }
+
+  public getAtmosphere(): THREE.Mesh | null {
+    return this.atmosphere;
+  }
+
+  public setIsHoveringMenuElement(value: boolean) {
+    this.isHoveringMenuElement = value;
+    if (!value) {
+      this.resetCameraPosition();
+    }
+  }
+
+  public getIsHoveringMenuElement(): boolean {
+    return this.isHoveringMenuElement;
   }
 }
