@@ -17,6 +17,9 @@ export class SceneManager {
   constructor(container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(container.clientWidth, container.clientHeight);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(this.renderer.domElement);
 
     this.gltfLoader = new GLTFLoader();

@@ -9,12 +9,16 @@ export class MainMenu_Scene extends RScene {
   private atmosphere: THREE.Mesh | null = null;
   private planetMaterial: THREE.MeshStandardMaterial | null = null;
   private cloudMaterial: THREE.MeshStandardMaterial | null = null;
+  private light: THREE.DirectionalLight | null = null;
   private initialized = false;
   private introAnimationDone = false;
   private isRotatingToCoordinate = false;
   private targetRotationQuaternion: THREE.Quaternion | null = null;
   private isHoveringMenuElement = false;
   private isResettingCameraPosition = false;
+  private cameraLerpStart: number | null = null;
+  private cameraLerpDuration = 500; // durée en ms (1.5s)
+  private startCameraQuaternion: THREE.Quaternion | null = null;
   private targetCameraQuaternion: THREE.Quaternion | null = null;
 
   constructor(container: HTMLElement, sceneManager: SceneManager) {
@@ -33,17 +37,15 @@ export class MainMenu_Scene extends RScene {
     );
     baseColor.colorSpace = THREE.SRGBColorSpace;
 
-    const planetMaterial = new THREE.MeshStandardMaterial({
+    const planetMaterial = new THREE.MeshPhysicalMaterial({
       map: baseColor,
       normalMap: normalMap,
       roughnessMap: roughnessMap,
       metalness: 0.0,
       roughness: 1.0,
-      flatShading: false,
-      side: THREE.FrontSide,
     });
 
-    const geometry = new THREE.SphereGeometry(1, 128, 128);
+    const geometry = new THREE.SphereGeometry(1, 512, 512);
     geometry.computeVertexNormals();
     const planet = new THREE.Mesh(geometry, planetMaterial);
     planet.name = "Planet";
@@ -51,13 +53,13 @@ export class MainMenu_Scene extends RScene {
     this.planetMaterial = planetMaterial;
 
     const clouds = await this.loadTexture("/textures/earth_clouds_8K.png");
-    const cloudMaterial = new THREE.MeshStandardMaterial({
+    const cloudMaterial = new THREE.MeshPhysicalMaterial({
       map: clouds,
       alphaMap: clouds,
       side: THREE.DoubleSide,
       transparent: true,
       depthWrite: false,
-      flatShading: false,
+      alphaTest: 0.1,
     });
     const cloudGeometry = new THREE.SphereGeometry(1.01, 128, 128);
     cloudGeometry.computeVertexNormals();
@@ -107,6 +109,14 @@ export class MainMenu_Scene extends RScene {
     planet.position.set(3.25, -1.75, 1);
     cloudMesh.position.set(3.25, -1.75, 1);
     volumetricSphere.position.set(3.25, -1.75, 1);
+
+    this.planet.castShadow = true;
+    this.clouds.castShadow = true;
+    this.planet.receiveShadow = true;
+    this.clouds.receiveShadow = true;
+
+    this.atmosphere.castShadow = false;
+    this.atmosphere.receiveShadow = false;
   }
 
   async Init() {
@@ -115,26 +125,50 @@ export class MainMenu_Scene extends RScene {
     this.getCamera().fov = 180;
     this.getCamera().updateProjectionMatrix();
 
-    const lightColor = "#FDE9A4";
-    const lightIntensity = 150;
-    const light = new THREE.PointLight(lightColor, lightIntensity);
-    light.position.set(-8, 2, -3);
+    const lightColor = "#F4E99B";
+    const lightIntensity = 5;
+    const sunLight = new THREE.DirectionalLight(lightColor, lightIntensity);
+    const ambientLight = new THREE.AmbientLight(lightColor, 0.2);
+    sunLight.position.set(-8, 2, -3);
 
-    this.addToScene(light);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 1000;
+
+    sunLight.shadow.camera.left = -5;
+    sunLight.shadow.camera.right = 5;
+    sunLight.shadow.camera.top = 5;
+    sunLight.shadow.camera.bottom = -5;
+
+    sunLight.shadow.bias = -0.0005;
+    sunLight.shadow.normalBias = 0.02;
 
     // this.addSkyboxFromEquirectangular('/textures/HDR_galactic_plane_no_nebulae.hdr');
 
     const skybox = await this.loadGLTF("/models/inside_galaxy/scene.gltf");
     if (skybox) {
       skybox.scale.set(10, 10, 10);
+      skybox.castShadow = false;
+      skybox.receiveShadow = false;
       this.addToScene(skybox);
     }
 
     await this.InitPlanet();
 
+    sunLight.target = new THREE.Object3D();
+    sunLight.target.position.set(0, 0, 0);
+    this.addToScene(sunLight.target);
+
+    this.light = sunLight;
+    this.addToScene(sunLight);
+    this.addToScene(ambientLight);
+
     this.initialized = true;
   }
 
+  // ANIMATION LOGIC
   isInitialized(): boolean {
     return this.initialized;
   }
@@ -146,9 +180,9 @@ export class MainMenu_Scene extends RScene {
     if (!value) {
       // Reset planet and camera
       if (this.planet && this.clouds && this.atmosphere) {
-        this.planet.scale.set(0.01, 0.01, 0.01);
-        this.clouds.scale.set(0.01, 0.01, 0.01);
-        this.atmosphere.scale.set(0.01, 0.01, 0.01);
+        this.planet.scale.set(0.001, 0.001, 0.001);
+        this.clouds.scale.set(0.001, 0.001, 0.001);
+        this.atmosphere.scale.set(0.001, 0.001, 0.001);
       }
       this.getCamera().fov = 180;
       this.getCamera().updateProjectionMatrix();
@@ -161,20 +195,18 @@ export class MainMenu_Scene extends RScene {
     if (!this.isHoveringMenuElement) {
       if (this.planet && this.planetMaterial) {
         this.planet.rotateOnAxis(new THREE.Vector3(0.34, 0.76, 0), 0.00005);
-        this.planetMaterial.needsUpdate = true;
       }
     }
 
     if (this.clouds && this.cloudMaterial) {
       this.clouds.rotateOnAxis(new THREE.Vector3(0.34, 0.76, 0), 0.000035);
-      this.cloudMaterial.needsUpdate = true;
     }
 
     if (!this.introAnimationDone) {
       // Intro animation
       if (this.planet && this.clouds && this.atmosphere) {
         if (this.getCamera().fov > 75) {
-          const scaleFactor = 0.2;
+          const scaleFactor = 0.4375;
           this.getCamera().fov -= scaleFactor;
           this.getCamera().updateProjectionMatrix();
         } else {
@@ -183,7 +215,7 @@ export class MainMenu_Scene extends RScene {
         }
 
         if (this.planet.scale.x < 4) {
-          const scaleFactor = 0.01;
+          const scaleFactor = 0.01665;
           this.planet.scale.x += scaleFactor;
           this.planet.scale.y += scaleFactor;
           this.planet.scale.z += scaleFactor;
@@ -217,8 +249,27 @@ export class MainMenu_Scene extends RScene {
       this.pointCameraToQt(this.targetRotationQuaternion);
     }
 
-    if (this.isResettingCameraPosition && this.targetCameraQuaternion) {
-      this.pointCameraToQt(this.targetCameraQuaternion);
+    if (
+      this.isResettingCameraPosition &&
+      this.cameraLerpStart &&
+      this.startCameraQuaternion &&
+      this.targetCameraQuaternion
+    ) {
+      const elapsed = performance.now() - this.cameraLerpStart;
+      const t = Math.min(elapsed / this.cameraLerpDuration, 1);
+
+      this.getCamera().quaternion.slerpQuaternions(
+        this.startCameraQuaternion,
+        this.targetCameraQuaternion,
+        t
+      );
+
+      if (t >= 1) {
+        this.cameraLerpStart = null;
+        this.startCameraQuaternion = null;
+        this.targetCameraQuaternion = null;
+        this.isResettingCameraPosition = false;
+      }
     }
   }
 
@@ -246,7 +297,6 @@ export class MainMenu_Scene extends RScene {
   ) {
     if (!this.planet) return;
     if (!this.clouds) return;
-    if (!this.introAnimationDone) return;
 
     this.planet.quaternion.slerp(targetQuaternion, speed);
     this.clouds.quaternion.slerp(targetQuaternion, speed);
@@ -263,41 +313,48 @@ export class MainMenu_Scene extends RScene {
 
   public pointCameraTo(position: THREE.Vector3) {
     if (!this.introAnimationDone) return;
+
     const direction = new THREE.Vector3()
       .subVectors(position, this.getCamera().position)
       .normalize();
-      
+
     const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, -1),
       direction
     );
+
+    this.startCameraQuaternion = this.getCamera().quaternion.clone();
     this.targetCameraQuaternion = targetQuaternion;
+    this.cameraLerpStart = performance.now();
+    this.cameraLerpDuration = this.cameraLerpDuration;
   }
 
   public pointCameraToQt(
     targetQuaternion: THREE.Quaternion,
     speed: number = 0.05
   ) {
-    if (!this.introAnimationDone) return;
+    if (!targetQuaternion) return;
+    this.isResettingCameraPosition = false;
 
     this.getCamera().quaternion.slerp(targetQuaternion, speed);
 
     const angleDifference =
       this.getCamera().quaternion.angleTo(targetQuaternion);
 
+    if (isNaN(angleDifference)) return;
+
     if (angleDifference < 0.001) {
       this.getCamera().quaternion.copy(targetQuaternion);
-      this.isResettingCameraPosition = false;
+      this.targetCameraQuaternion = null;
     }
   }
 
-  public resetCameraPosition() {
+  public resetCameraTarget() {
     if (!this.introAnimationDone) return;
     this.isResettingCameraPosition = true;
-    this.getCamera().position.set(0, 0, 5);
+    this.isRotatingToCoordinate = false;
+
     this.pointCameraTo(new THREE.Vector3(0, 0, 0));
-    this.getCamera().fov = 75;
-    this.getCamera().updateProjectionMatrix();
   }
 
   public getPlanet(): THREE.Mesh | null {
@@ -315,7 +372,7 @@ export class MainMenu_Scene extends RScene {
   public setIsHoveringMenuElement(value: boolean) {
     this.isHoveringMenuElement = value;
     if (!value) {
-      this.resetCameraPosition();
+      this.resetCameraTarget();
     }
   }
 
