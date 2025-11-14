@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
 
+@import 'primeicons/primeicons.css';
+
+
 @font-face {
   font-family: "Space Grotesk";
   src: url("../fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf");
@@ -21,6 +24,6 @@ h1 {
   --p-primary-color: #FCF5ED !important;
   --p-primary-contrast-color: #1F1717 !important;
   --p-primary-hover-color: #DAD2DB !important;
-  --p-primary-active-color: #CE5A67 !important;
+  --p-primary-active-color: #F4BF96 !important;
 }
 

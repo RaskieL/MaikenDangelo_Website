@@ -1,89 +1,126 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
-import type { RScene } from './scenes/Scene';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
+import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
+import type { RScene } from "./scenes/Scene";
 
 export class SceneManager {
-  private scenes: RScene[] = [];
-  private renderer: THREE.WebGLRenderer;
-  private gltfLoader: GLTFLoader;
-  private hdrLoader: HDRLoader;
-  private exrLoader: EXRLoader;
-  private textureLoader: THREE.TextureLoader;
-  private objectLoader: OBJLoader = new OBJLoader();
+	private readonly scenes: RScene[] = [];
+	private readonly renderer: THREE.WebGLRenderer;
+	private readonly gltfLoader: GLTFLoader;
+	private readonly hdrLoader: HDRLoader;
+	private readonly exrLoader: EXRLoader;
+	private readonly textureLoader: THREE.TextureLoader;
+	private readonly objectLoader: OBJLoader = new OBJLoader();
 
-  constructor(container: HTMLElement) {
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    container.appendChild(this.renderer.domElement);
+	private currentSceneIndex: number = 0;
 
-    this.gltfLoader = new GLTFLoader();
-    this.hdrLoader = new HDRLoader();
-    this.exrLoader = new EXRLoader();
-    this.textureLoader = new THREE.TextureLoader();
+	constructor(container: HTMLElement) {
+		this.renderer = new THREE.WebGLRenderer();
+		this.renderer.setSize(container.clientWidth, container.clientHeight);
+		this.renderer.shadowMap.enabled = true;
+		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+		container.appendChild(this.renderer.domElement);
 
-    window.addEventListener("resize", () => {
-      this.onWindowResize(container);
-    });
+		this.gltfLoader = new GLTFLoader();
+		this.hdrLoader = new HDRLoader();
+		this.exrLoader = new EXRLoader();
+		this.textureLoader = new THREE.TextureLoader();
+
+		window.addEventListener("resize", () => {
+			this.onWindowResize(container);
+		});
+	}
+
+	addScene(object: RScene) {
+		this.scenes.push(object);
+	}
+
+	popScene(): RScene | undefined {
+		return this.scenes.pop();
+	}
+
+	clearScenes(): void {
+		while (this.scenes.length > 1) {
+			this.popScene();
+		}
+		this.currentSceneIndex = 0;
+	}
+
+	getCurrentScene(): RScene | undefined {
+		if (this.scenes.length === 0) return undefined;
+		return this.scenes.at(this.currentSceneIndex);
+	}
+
+	goBackOneScene(): void {
+		this.currentSceneIndex--;
+		if (this.currentSceneIndex < 0) this.currentSceneIndex = 0;
+	}
+
+	goBackForward(): void {
+		this.currentSceneIndex++;
+		if (this.currentSceneIndex >= this.scenes.length) this.currentSceneIndex = this.scenes.length - 1;
+	}
+
+	goToLastScene(): void {
+		this.setSceneIndex(this.scenes.length - 1);
+	}
+
+	getScenesNumber(): number {
+		return this.scenes.length;
+	}
+
+  getCurrentIndex(): number {
+    return this.currentSceneIndex;
   }
 
-  addScene(object: RScene) {
-    this.scenes.push(object);
-  }
+	setSceneIndex(index: number): void {
+		this.currentSceneIndex = index;
+		if (this.currentSceneIndex < 0) this.currentSceneIndex = 0;
+		if (this.currentSceneIndex >= this.scenes.length) this.currentSceneIndex = this.scenes.length - 1;
+	}
 
-  popScene(): RScene | undefined {
-    return this.scenes.pop();
-  }
+	render(scene: RScene | undefined = this.getCurrentScene()) {
+		if (!scene) return;
+		this.renderer.render(scene.getScene(), scene.getCamera());
+	}
 
-  getCurrentScene(): RScene | undefined {
-    if (this.scenes.length === 0) return undefined;
-    return this.scenes[this.scenes.length - 1];
-  }
+	private onWindowResize(container: HTMLElement) {
+		this.renderer.setSize(container.clientWidth, container.clientHeight);
+	}
 
-  render(scene: RScene | undefined = this.getCurrentScene()) {
-    if (!scene) return;
-    this.renderer.render(scene.getScene(), scene.getCamera());
-  }
+	animate(callback?: () => void) {
+		const loop = () => {
+			requestAnimationFrame(loop);
+			if (callback) callback();
+			this.render();
+		};
+		loop();
+	}
 
-  private onWindowResize(container: HTMLElement) {
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
-  }
+	getRenderer(): THREE.WebGLRenderer {
+		return this.renderer;
+	}
 
-  animate(callback?: () => void) {
-    const loop = () => {
-      requestAnimationFrame(loop);
-      if (callback) callback();
-      this.render();
-    };
-    loop();
-  }
+	getGLTFLoader(): GLTFLoader {
+		return this.gltfLoader;
+	}
 
-  getRenderer(): THREE.WebGLRenderer {
-    return this.renderer;
-  }
+	getHDRLoader(): HDRLoader {
+		return this.hdrLoader;
+	}
 
-  getGLTFLoader(): GLTFLoader {
-    return this.gltfLoader;
-  }
+	getEXRLoader(): EXRLoader {
+		return this.exrLoader;
+	}
 
-  getHDRLoader(): HDRLoader {
-    return this.hdrLoader;
-  }
+	getTextureLoader(): THREE.TextureLoader {
+		return this.textureLoader;
+	}
 
-  getEXRLoader(): EXRLoader {
-    return this.exrLoader;
-  }
-
-  getTextureLoader(): THREE.TextureLoader {
-    return this.textureLoader;
-  }
-
-  getObjectLoader(): OBJLoader {
-    return this.objectLoader;
-  }
+	getObjectLoader(): OBJLoader {
+		return this.objectLoader;
+	}
 }
