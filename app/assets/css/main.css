@@ -32,11 +32,21 @@ h3 {
   font-size: 1.5rem;
 }
 
+a {
+  color: #0370DD;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #8D5A97;
+  transition: 0.1s linear;
+}
 
 :root {
+  --p-primary-background-color: rgba(5,10,5,0.7) !important;
   --p-primary-color: #FCF5ED !important;
   --p-primary-contrast-color: #1F1717 !important;
-  --p-primary-hover-color: #DAD2DB !important;
+  --p-primary-hover-color: #F6E2CB !important;
   --p-primary-active-color: #F4BF96 !important;
 }
 

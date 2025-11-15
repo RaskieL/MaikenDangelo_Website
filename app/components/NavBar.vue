@@ -1,7 +1,7 @@
 <template>
 	<div class="flex z-20 m-5 gap-10 absolute h-[10vh] w-full items-center">
 		<div
-			class="flex flex-row p-5 gap-5 justify-center items-center bg-[rgba(0,0,0,0.6)] rounded-xl backdrop-blur-sm w-[10vw] h-[6vh]">
+			class="flex flex-row p-5 gap-5 justify-center items-center bg-[var(--p-primary-background-color)] rounded-xl backdrop-blur-sm w-[10vw] h-[6vh]">
 			<Button
 				:disabled="(props.sceneManager && props.sceneManager.getCurrentIndex() <= 0) as boolean"
 				icon="pi pi-angle-left"
@@ -23,7 +23,7 @@
 		</div>
 
 		<div
-			class="flex flex-row gap-10 justify-center items-center bg-[rgba(0,0,0,0.6)] p-5 rounded-xl backdrop-blur-sm w-[80vw] h-[6vh]">
+			class="flex flex-row gap-10 justify-center items-center bg-[var(--p-primary-background-color)] p-5 rounded-xl backdrop-blur-sm w-[80vw] h-[6vh]">
 			<Button
 				label="Portfolio"
 				class="w-[18%]"
