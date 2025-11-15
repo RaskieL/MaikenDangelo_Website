@@ -22,7 +22,7 @@ export class MainMenuScene extends RScene {
 	private targetCameraQuaternion: THREE.Quaternion | null = null;
 
 	constructor(container: HTMLElement, sceneManager: SceneManager) {
-		super(container, sceneManager);
+		super(container, sceneManager, "MainMenuScene");
 		this.Init();
 	}
 
@@ -141,8 +141,6 @@ export class MainMenuScene extends RScene {
 		this.sunLight.shadow.bias = -0.0005;
 		this.sunLight.shadow.normalBias = 0.02;
 
-		// this.addSkyboxFromEquirectangular('/textures/HDR_galactic_plane_no_nebulae.hdr');
-
 		const skybox = await this.loadGLTF("/models/inside_galaxy/scene.gltf");
 		if (skybox) {
 			skybox.scale.set(10, 10, 10);
@@ -158,7 +156,7 @@ export class MainMenuScene extends RScene {
 		this.addToScene(this.sunLight.target);
 
 		this.addToScene(this.sunLight);
-		//this.addToScene(ambientLight);
+		this.addToScene(ambientLight);
 
 		this.initialized = true;
 	}
@@ -187,10 +185,8 @@ export class MainMenuScene extends RScene {
 	animate() {
 		if (!this.initialized) return;
 
-		if (!this.isHoveringMenuElement) {
-			if (this.planet && this.planetMaterial) {
-				this.planet.rotateOnAxis(new THREE.Vector3(0.34, 0.76, 0), 0.00005);
-			}
+		if (!this.isHoveringMenuElement && this.planet && this.planetMaterial) {
+			this.planet.rotateOnAxis(new THREE.Vector3(0.34, 0.76, 0), 0.00005);
 		}
 
 		if (this.clouds && this.cloudMaterial) {

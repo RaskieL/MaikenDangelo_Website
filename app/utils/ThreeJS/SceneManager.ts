@@ -35,7 +35,17 @@ export class SceneManager {
 	}
 
 	addScene(object: RScene) {
+		for(let i = 0; i < this.scenes.length; i++){
+			const scene = this.scenes[i];
+			if(scene && scene.label === object.label){
+				this.scenes.splice(i,1);
+				this.scenes.push(scene);
+				this.goToLastScene();
+				return;
+			}
+		}
 		this.scenes.push(object);
+		this.goToLastScene();
 	}
 
 	popScene(): RScene | undefined {
@@ -72,9 +82,9 @@ export class SceneManager {
 		return this.scenes.length;
 	}
 
-  getCurrentIndex(): number {
-    return this.currentSceneIndex;
-  }
+	getCurrentIndex(): number {
+		return this.currentSceneIndex;
+	}
 
 	setSceneIndex(index: number): void {
 		this.currentSceneIndex = index;

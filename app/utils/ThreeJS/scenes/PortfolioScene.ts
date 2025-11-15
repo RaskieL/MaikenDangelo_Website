@@ -4,9 +4,9 @@ import type { SceneManager } from "../SceneManager";
 import { RScene } from "./Scene";
 
 export class PortfolioScene extends RScene {
-    // constructor(container: HTMLElement, sceneManager: SceneManager) {
-    // 	super(container, sceneManager);
-    // }
+    constructor(container: HTMLElement, sceneManager: SceneManager) {
+		super(container, sceneManager, "PortfolioScene");
+	}
 
     override animate(): void {
         

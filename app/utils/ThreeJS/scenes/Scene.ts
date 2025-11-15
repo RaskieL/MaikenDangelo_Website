@@ -6,6 +6,7 @@ import type { SceneManager } from "../SceneManager";
 import type { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 
 export abstract class RScene {
+	public label: string;
 	private readonly scene: THREE.Scene;
 	private readonly camera: THREE.PerspectiveCamera;
 	private readonly gltfLoader: GLTFLoader;
@@ -14,7 +15,7 @@ export abstract class RScene {
 	private readonly textureLoader: THREE.TextureLoader;
 	private readonly objectLoader: OBJLoader;
 
-	constructor(container: HTMLElement, sceneManager: SceneManager) {
+	constructor(container: HTMLElement, sceneManager: SceneManager, label: string) {
 		this.scene = new THREE.Scene();
 		this.camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
 		this.camera.position.z = 5;
@@ -25,6 +26,8 @@ export abstract class RScene {
 		this.exrLoader = sceneManager.getEXRLoader();
 		this.textureLoader = sceneManager.getTextureLoader();
 		this.objectLoader = sceneManager.getObjectLoader();
+
+		this.label = label;
 
 		window.addEventListener("resize", () => {
 			this.onWindowResize(container);

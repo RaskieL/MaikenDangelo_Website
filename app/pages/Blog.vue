@@ -1,6 +1,6 @@
 <template>
   <div>
-    <InputText placeholder="Votre message" />
+    <h1>Blog</h1>
   </div>
 </template>
 
