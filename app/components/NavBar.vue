@@ -1,5 +1,5 @@
 <template>
-	<div class="flex z-20 m-5 gap-10 absolute h-[10vh] w-full items-center">
+	<div class="flex z-20 m-5 gap-10 absolute h-[10vh] items-center">
 		<div
 			class="flex flex-row p-5 gap-5 justify-center items-center bg-[var(--p-primary-background-color)] rounded-xl backdrop-blur-sm w-[10vw] h-[6vh]">
 			<Button
@@ -37,7 +37,7 @@
 				icon="pi pi-book"
 				@mouseover="menuElementHover(new THREE.Vector3(0, 1, 3))"
 				@mouseout="menuElementOut()"
-				@click="clickMenuButton(1)" />
+				@click="clickMenuButton(1)" disabled />
 
 			<div class="text-center mr-10 ml-10">
 				<h1 class="text-[40px]">maikendangelo.fr</h1>
@@ -73,8 +73,8 @@
 	const router = useRouter();
 
 	const props = defineProps<{
-		sceneManager: SceneManager | null;
-		container: HTMLDivElement | null;
+		sceneManager: SceneManager | undefined;
+		container: HTMLDivElement | undefined;
 	}>();
 	function goHome() {
 		if (props.sceneManager) {

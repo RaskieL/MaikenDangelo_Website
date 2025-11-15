@@ -4,7 +4,7 @@
 		<div class="flex flex-col gap-5 w-[50%]">
 			<h2>Coordonnées</h2>
 			<div class="flex flex-row gap-5 items-center bg-[#0E1116] p-5 rounded-2xl">
-				<i class="pi pi-directions" />
+				<i class="pi pi-map-marker" />
 				<p>Belfort, Lyon, Avignon</p>
 			</div>
 			<div class="flex flex-row gap-5 items-center bg-[#0E1116] p-5 rounded-2xl">

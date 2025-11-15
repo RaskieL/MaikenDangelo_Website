@@ -15,7 +15,6 @@
 				<br /><br />
 				Passionnée par les jeux vidéos et les mondes virtuels, mon ambition est de devenir Technical Artist.
 			</p>
-      <Button label="Me contacter" />
 		</div>
 	</div>
 </template>

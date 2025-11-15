@@ -46,7 +46,6 @@
 		sceneManager.addScene(main_menu);
 
 		const currentRoute = route.name;
-		console.log(currentRoute);
 		if (currentRoute === "Contact") {
 			const contact = new ContactScene(containerRef.value, sceneManager);
 			sceneManager.addScene(contact);
