@@ -1,8 +1,8 @@
 <template>
 	<div
-		class="flex flex-col lg:flex-row gap-10 p-10 text-[1.2rem] bg-(--p-primary-background-color) w-full h-[80vh] lg:w-[50%] rounded-xl backdrop-blur-sm">
-		<div class="flex flex-col gap-5 items-center justify-center w-full lg:w-[50%]">
-			<Image src="/unnamed.jpg" image-class="rounded-xl w-[50%]" />
+		class="flex flex-col lg:flex-row gap-10 p-10 text-[1.2rem] bg-(--p-primary-background-color) w-full h-[80vh] lg:h-min lg:w-[60%] rounded-xl backdrop-blur-sm justify-center">
+		<div class="flex flex-col gap-5 items-center justify-center w-full">
+			<Image src="/unnamed.jpg" image-class="rounded-xl w-[100%]" />
 			<p>星々と永遠へ</p>
 		</div>
 		<div class="flex flex-col gap-5 overflow-y-scroll">

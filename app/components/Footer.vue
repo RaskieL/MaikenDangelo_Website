@@ -1,7 +1,7 @@
 <template>
 	<div
-		class="grid grid-cols-3 w-full min-h-[5vh] top-[100vh] text-center p-4 bg-(--p-primary-background-color) backdrop-blur-sm">
-		<div class="flex flex-col gap-2">
+		class="grid grid-cols-3 w-full min-h-[5vh] text-center p-4 bg-(--p-primary-background-color) backdrop-blur-sm top-[100vh] items-center justify-center">
+		<div class="flex flex-col gap-2 justify-center items-center">
 			<h3>Comptes Git</h3>
 			<a target="_blank" href="https://github.com/RaskieL">RaskieL</a>
 			<a target="_blank" href="https://gitlab.com/RaskieL">RaskieL (Gitlab)</a>
@@ -11,7 +11,7 @@
 			<p class="">© {{ year }} Maïken D'Angelo</p>
 			<Image id="seal" src="/footer-azarashi.png" image-class="rounded-2xl" @click.stop="playSealAudio" />
 		</div>
-		<div class="flex flex-col gap-2 items-center">
+		<div class="flex flex-col gap-2 items-center justify-center">
 			<h3>Réseaux sociaux</h3>
 			<div class="grid grid-cols-2 items-center w-1/2">
 				<i class="pi pi-at" />

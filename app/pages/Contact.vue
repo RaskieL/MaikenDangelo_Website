@@ -1,7 +1,7 @@
 <template>
 	<div
-		class="flex flex-row gap-10 p-10 text-[1.2rem] bg-[var(--p-primary-background-color)] w-[50vw] rounded-xl backdrop-blur-sm">
-		<div class="flex flex-col gap-5 w-[50%]">
+		class="flex flex-col lg:flex-row gap-10 p-10 text-[1.2rem] bg-(--p-primary-background-color) w-full h-[80vh] lg:h-fit rounded-xl backdrop-blur-sm overflow-y-scroll">
+		<div class="flex flex-col gap-5 w-full lg:w-[50%]">
 			<h2>Coordonnées</h2>
 			<div class="flex flex-row gap-5 items-center bg-[#0E1116] p-5 rounded-2xl">
 				<i class="pi pi-map-marker" />
@@ -38,19 +38,26 @@
 				(non implémenté)
 			</div>
 			<form class="flex flex-col gap-5" method="post" @submit.prevent="(event) => submitContactForm(event)">
-				<div class="grid grid-cols-2 gap-5">
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 					<FloatLabel variant="on">
 						<InputText
 							id="name"
 							v-model="firstName"
 							type="text"
+							class="w-full"
 							:invalid="firstName.length <= 0"
 							required />
 						<label class="text-md" for="name" required>Nom</label>
 					</FloatLabel>
 
 					<FloatLabel variant="on">
-						<InputText id="firstname" v-model="name" type="text" :invalid="name.length <= 0" required />
+						<InputText
+							id="firstname"
+							v-model="name"
+							type="text"
+							class="w-full"
+							:invalid="name.length <= 0"
+							required />
 						<label for="firstname">Prénom</label>
 					</FloatLabel>
 				</div>
@@ -88,8 +95,15 @@
 					<label for="message">Message</label>
 				</FloatLabel>
 
-				<div class="grid grid-cols-2 gap-30 items-center">
-					<Button type="submit" icon="pi pi-send" label="Envoyer" :disabled="!isHuman" />
+				<div class="grid grid-cols-2 gap-30 items-center w-full">
+					<Button
+						type="submit"
+						icon="pi pi-send"
+						:pt="{
+							label: { class: 'hidden md:block' },
+						}"
+						label="Envoyer"
+						:disabled="!isHuman" />
 					<div class="flex flex-row gap-2 bg-[#0E1116] p-3 items-center justify-end rounded-xl">
 						<Checkbox
 							v-model="isHuman"
