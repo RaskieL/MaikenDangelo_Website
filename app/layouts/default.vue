@@ -1,13 +1,14 @@
 <template>
-	<div ref="containerRef" class="h-screen w-screen absolute z-10">
+	<div class="flex flex-col z-10">
+		<div ref="containerRef" class="h-screen w-screen absolute z-5" />
 		<NavBar
-			class="z-30"
+			class="z-30 mb-[40px]"
 			:scene-manager="sceneManagerRef as SceneManager"
 			:container="containerRef as HTMLDivElement" />
-		<div class="flex h-screen w-screen absolute z-20 items-center justify-center">
+		<div class="z-20 h-full items-center justify-center m-[4%]">
 			<slot />
 		</div>
-		<Footer />
+		<Footer class="hidden lg:flex z-30" />
 	</div>
 </template>
 

@@ -1,7 +1,7 @@
 <template>
-	<div class="flex z-20 m-5 gap-10 absolute h-[10vh] items-center">
+	<div class="flex flex-col lg:flex-row z-20 m-5 gap-5 xl:gap-10 h-[10vh] items-center">
 		<div
-			class="flex flex-row p-5 gap-5 justify-center items-center bg-[var(--p-primary-background-color)] rounded-xl backdrop-blur-sm w-[10vw] h-[6vh]">
+			class="flex flex-row p-5 gap-5 justify-center items-center bg-(--p-primary-background-color) rounded-xl backdrop-blur-sm w-max xl:w-[10vw] h-[6vh]">
 			<Button
 				:disabled="(props.sceneManager && props.sceneManager.getCurrentIndex() <= 0) as boolean"
 				icon="pi pi-angle-left"
@@ -23,29 +23,39 @@
 		</div>
 
 		<div
-			class="flex flex-row gap-10 justify-center items-center bg-[var(--p-primary-background-color)] p-5 rounded-xl backdrop-blur-sm w-[80vw] h-[6vh]">
+			class="flex flex-row gap-10 justify-center items-center bg-(--p-primary-background-color) p-5 rounded-xl backdrop-blur-sm w-[80vw] h-[6vh]">
 			<Button
 				label="Portfolio"
 				class="w-[18%]"
 				icon="pi pi-folder"
+				:pt="{
+					label: { class: 'hidden md:block' },
+				}" 
 				@mouseover="menuElementHover(new THREE.Vector3(-0.5, 0, 1))"
 				@mouseout="menuElementOut()"
-				@click="clickMenuButton(0)" />
+				@click="clickMenuButton(0)"/>
 			<Button
 				label="Blog"
 				class="w-[18%]"
 				icon="pi pi-book"
+				:pt="{
+					label: { class: 'hidden md:block' },
+				}" 
 				@mouseover="menuElementHover(new THREE.Vector3(0, 1, 3))"
 				@mouseout="menuElementOut()"
-				@click="clickMenuButton(1)" disabled />
+				@click="clickMenuButton(1)"
+				disabled />
 
-			<div class="text-center mr-10 ml-10">
+			<div class="text-center mr-10 ml-10 hidden xl:block">
 				<h1 class="text-[40px]">maikendangelo.fr</h1>
 			</div>
 			<Button
 				label="Contact"
 				class="w-[18%]"
 				icon="pi pi-phone"
+				:pt="{
+					label: { class: 'hidden md:block' },
+				}" 
 				@mouseover="menuElementHover(new THREE.Vector3(-3, 0, 1))"
 				@mouseout="menuElementOut()"
 				@click="clickMenuButton(2)" />
@@ -53,6 +63,9 @@
 				label="À propos"
 				class="w-[18%]"
 				icon="pi pi-info-circle"
+				:pt="{
+					label: { class: 'hidden md:block' },
+				}" 
 				@mouseover="menuElementHover(new THREE.Vector3(2, -1, 4))"
 				@mouseout="menuElementOut()"
 				@click="clickMenuButton(3)" />
@@ -96,7 +109,7 @@
 	}
 
 	function goToRightPage() {
-		if(!props.sceneManager) return;
+		if (!props.sceneManager) return;
 		const scene = props.sceneManager.getCurrentScene();
 		if (scene instanceof MainMenuScene) router.push("/");
 		else if (scene instanceof PortfolioScene) router.push("/portfolio");

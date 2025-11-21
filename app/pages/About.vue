@@ -1,11 +1,11 @@
 <template>
 	<div
-		class="flex flex-row gap-10 p-10 text-[1.2rem] bg-[var(--p-primary-background-color)] w-[50vw] max-w-[50vw] rounded-xl backdrop-blur-sm">
-		<div class="flex flex-col gap-5 items-center justify-center w-[50%]">
-			<Image src="/unnamed.jpg" image-class="rounded-xl w-[512px]" />
+		class="flex flex-col lg:flex-row gap-10 p-10 text-[1.2rem] bg-(--p-primary-background-color) w-full h-[80vh] lg:w-[50%] rounded-xl backdrop-blur-sm">
+		<div class="flex flex-col gap-5 items-center justify-center w-full lg:w-[50%]">
+			<Image src="/unnamed.jpg" image-class="rounded-xl w-[50%]" />
 			<p>星々と永遠へ</p>
 		</div>
-		<div class="flex flex-col gap-5 overflow-hidden">
+		<div class="flex flex-col gap-5 overflow-y-scroll">
 			<h2>À propos de moi</h2>
 			<p>
 				Je m'appelle Maïken D'Angelo, originaire du Périgord et agée de 22 ans, je suis étudiante en troisième

@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="grid grid-cols-3 w-full min-h-[5vh] absolute top-[100vh] text-center p-4 bg-[var(--p-primary-background-color)] backdrop-blur-sm">
+		class="grid grid-cols-3 w-full min-h-[5vh] top-[100vh] text-center p-4 bg-(--p-primary-background-color) backdrop-blur-sm">
 		<div class="flex flex-col gap-2">
 			<h3>Comptes Git</h3>
 			<a target="_blank" href="https://github.com/RaskieL">RaskieL</a>
